@@ -25,17 +25,31 @@
                         </li>
                         {% if user.is_authenticated%}
                             <li class="nav-item">
-                                <a class="nav-link" href="#">Logout</a>
+                                <a class="nav-link" href="/accounts/logout">Logout</a>
                             </li>
                         {% else %}
                             <li class="nav-item">
-                                <a class="nav-link" href="#">Login</a>
+                                <a class="nav-link" href="/accounts/login">Login</a>
                             </li>
                         {% endif %}
                     </ul>
                 </div>
             </div>
         </nav>
+
+        {% if messages %}
+        {% for message in messages %}
+        <div
+            {% if message.tags == 'error' %} class="alert alert-danger"
+            {% elif message.tags == 'success' or message.tags == 'warning' %} class="alert alert-{{ message.tags }}"
+            {% else %} class="alert alert-info"
+            {% endif %}>
+            {{ message }}
+        </div>
+        {% endfor %}
+        {% endif %}
+
+        <br>
 
         {% block content %}
         {% endblock %}

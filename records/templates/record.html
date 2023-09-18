@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Income{% endblock %}
+
+{% block content %}
+    <div class="mx-auto" style="width: 30%;">
+        <div>
+            <h1 style="text-align: center;">Income</h1>
+        </div>
+        <hr>
+        <form method="post" action="/records/income" class="form-horizontal">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label for="name" class="form-label">Name:</label>
+                <input type="text" class="form-control" name="name" id="name" placeholder="Enter name" required>
+            </div>
+            <div class="mb-3">
+                <label for="value" class="form-label">Ammount:</label>
+                <input type="number" class="form-control" name="value" id="value" placeholder="Enter ammount" required>
+            </div>
+            <div class="mb-3">
+                <label for="is_income" class="form-label">Type:</label>
+                <select class="form-control" name="is_income" id="is_income" Required>
+                    <option value=0>Expense</option>
+                    <option value=1>Income</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="category" class="form-label">Category:</label>
+                <select class="form-control" name="category" id="category" Required>
+                    {% for category in categories %}
+                    <option value={{category.id}}>{{category.name}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="description" class="form-label">Description:</label>
+                <input type="text" class="form-control" name="description" id="description" placeholder="Enter description">
+            </div>
+            <button type="submit" class="btn btn-primary">Save</button>
+            <a class="btn btn-secondary" >Cancel</button>
+        </form>
+    </div>
+{% endblock %}

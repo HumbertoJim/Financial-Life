@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<h1>Dashboard</h1>
+{% if records %}
+<ul>
+    {% for record in records %}
+    <li>record</li>
+    {% endfor %}
+</ul>
+{% endif %}
+{% endblock %}

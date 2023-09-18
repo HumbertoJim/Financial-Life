@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Income{% endblock %}
+
+{% block content %}
+<div class="mx-auto" style="width: 30%;">
+    <div>
+        <h1 style="text-align: center;">Category</h1>
+    </div>
+    <hr>
+    <form method="post" action="/records/category" class="form-horizontal">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="name" class="form-label">Name:</label>
+            <input type="text" class="form-control" name="name" id="name" placeholder="Enter name" required>
+        </div>
+        <div class="mb-3">
+            <label for="description" class="form-label">Description:</label>
+            <input type="text" class="form-control" name="description" id="description" placeholder="Enter description">
+        </div>
+        <div class="mb-3">
+            <label for="color" class="form-label">Color:</label>
+            <input type="color" class="form-control" name="color" id="color" value="#101010">
+        </div>
+        <button type="submit" class="btn btn-primary">Save</button>
+        <a class="btn btn-secondary" href="/records/dashboard">Cancel</button>
+    </form>
+</div>
+{% endblock %}

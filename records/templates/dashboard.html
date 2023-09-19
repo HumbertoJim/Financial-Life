@@ -4,10 +4,21 @@
 
 {% block content %}
 <h1>Dashboard</h1>
+<a class="btn btn-primary" href="/records/record">Add Record</a>
+<a class="btn btn-primary" href="/records/category">Add Category</a>
+{% if categories %}
+<h3>Categories</h3>
+<ul>
+    {% for category in categories %}
+    <li>{{category}}</li>
+    {% endfor %}
+</ul>
+{% endif %}
 {% if records %}
+<h3>Records</h3>
 <ul>
     {% for record in records %}
-    <li>record</li>
+    <li>{{record}}</li>
     {% endfor %}
 </ul>
 {% endif %}

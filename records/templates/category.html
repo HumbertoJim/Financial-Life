@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Income{% endblock %}
+{% block title %}Category{% endblock %}
 
 {% block content %}
 <div class="mx-auto" style="width: 30%;">
@@ -10,19 +10,23 @@
     <form method="post" action="/records/category" class="form-horizontal">
         {% csrf_token %}
         <div class="mb-3">
-            <label for="name" class="form-label">Name:</label>
-            <input type="text" class="form-control" name="name" id="name" placeholder="Enter name" required>
+            <label for="name" class="form-label">Name</label>
+            <input type="text" class="form-control" name="name" id="name" placeholder="Enter name" value="{{form.name.value}}" required>
         </div>
         <div class="mb-3">
-            <label for="description" class="form-label">Description:</label>
-            <input type="text" class="form-control" name="description" id="description" placeholder="Enter description">
+            <label for="description" class="form-label">Description</label>
+            <input type="text" class="form-control" name="description" id="description" placeholder="Enter description" value="{{form.description.value}}" required>
         </div>
         <div class="mb-3">
-            <label for="color" class="form-label">Color:</label>
-            <input type="color" class="form-control" name="color" id="color" value="#101010">
+            <label for="color" class="form-label">Color</label>
+            <input type="color" class="form-control" name="color" id="color" value="#A0A0A0" value="{{form.color.value}}" required>
         </div>
-        <button type="submit" class="btn btn-primary">Save</button>
-        <a class="btn btn-secondary" href="/records/dashboard">Cancel</button>
+        <div class="mb-3">
+            <button type="submit" class="btn btn-primary">Save</button>
+        
+            <a class="btn btn-secondary" href="/records/dashboard">Cancel</a>
+        </div>
+        
     </form>
 </div>
 {% endblock %}

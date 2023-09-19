@@ -7,37 +7,45 @@
             <h1 style="text-align: center;">Income</h1>
         </div>
         <hr>
-        <form method="post" action="/records/income" class="form-horizontal">
+        <form method="post" action="/records/record" class="form-horizontal">
             {% csrf_token %}
             <div class="mb-3">
-                <label for="name" class="form-label">Name:</label>
-                <input type="text" class="form-control" name="name" id="name" placeholder="Enter name" required>
+                <label for="title" class="form-label">Title</label>
+                <input type="text" class="form-control" name="title" id="title" placeholder="Enter name" value="{{form.title.value}}" foo>
             </div>
             <div class="mb-3">
-                <label for="value" class="form-label">Ammount:</label>
-                <input type="number" class="form-control" name="value" id="value" placeholder="Enter ammount" required>
+                <label for="value" class="form-label">Value ($)</label>
+                <div class="input-group">
+                    <span class="input-group-text">$</span>
+                    <input type="number" class="form-control" name="value" id="value" placeholder="Enter ammount" value="{{form.value.value}}"
+                        min="0.00" max="10000.00" step="100.00" pattern="\d+(\.\d{1,2})?" foo>
+                </div>
             </div>
             <div class="mb-3">
-                <label for="is_income" class="form-label">Type:</label>
-                <select class="form-control" name="is_income" id="is_income" Required>
+                <label for="is_income" class="form-label">Type</label>
+                <select class="form-control" name="is_income" id="is_income" value="{{form.is_income.value}}" foo>
                     <option value=0>Expense</option>
                     <option value=1>Income</option>
                 </select>
             </div>
             <div class="mb-3">
-                <label for="category" class="form-label">Category:</label>
-                <select class="form-control" name="category" id="category" Required>
+                <label for="category" class="form-label">Category</label>
+                <select class="form-control" name="category" id="category" foo>
                     {% for category in categories %}
-                    <option value={{category.id}}>{{category.name}}</option>
+                    <option value={{category.id}}
+                        {% if form.category.value == category.id %}
+                        selected
+                        {% endif %}>{{category.name}}
+                    </option>
                     {% endfor %}
                 </select>
             </div>
             <div class="mb-3">
-                <label for="description" class="form-label">Description:</label>
-                <input type="text" class="form-control" name="description" id="description" placeholder="Enter description">
+                <label for="description" class="form-label">Description</label>
+                <input type="text" class="form-control" name="description" id="description" placeholder="Enter description" value="{{form.description.value}}">
             </div>
             <button type="submit" class="btn btn-primary">Save</button>
-            <a class="btn btn-secondary" >Cancel</button>
+            <a class="btn btn-secondary" >Cancel</a>
         </form>
     </div>
 {% endblock %}

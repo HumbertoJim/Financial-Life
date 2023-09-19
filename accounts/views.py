@@ -26,8 +26,7 @@ class Login(View):
             else:
                 messages.error(request, 'Invalid user or password')
         else:
-            for error in form.errors:
-                messages.error(request, form.errors[error])
+            messages.error(request, form.errors)
         return render(request, 'login.html', {'form':form})
     
 

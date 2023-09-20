@@ -8,7 +8,7 @@ from django.contrib.auth.models import User
 class Category(models.Model):
     name = models.CharField(max_length=50)
     description = models.TextField(default='')
-    color = models.CharField(default='#A0A0A0', max_length=7)
+    color = models.CharField(default='#ff69b4', max_length=7)
 
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)

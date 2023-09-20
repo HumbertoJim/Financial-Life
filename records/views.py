@@ -7,21 +7,19 @@ from records.forms import RecordForm, CategoryForm
 from records.serializers import RecordSerializer, CategorySerializer
 
 # Create your views here.
-def dashboard(request):
-    if request.user.is_authenticated:
-        categories = Category.objects.filter(user=request.user)
-        category_serializer = CategorySerializer(categories, many=True)
-        records = Record.objects.filter(user=request.user).order_by('-created_at')
-        record_serializer = RecordSerializer(records, many=True)
-        context = {
-            'categories': category_serializer.data,
-            'records': record_serializer.data,
-        }
-        return render(request, 'dashboard.html', context)
-    else:
-        return redirect('/accounts/login')
-    
 class RecordView(View):
+    def get(self, request):
+        if request.user.is_authenticated:
+            records = Record.objects.filter(user=request.user).order_by('-created_at')
+            record_serializer = RecordSerializer(records, many=True)
+            context = {
+                'records': record_serializer.data,
+            }
+            return render(request, 'records.html', context)
+        else:
+            return redirect('/accounts/login')
+    
+class CreateRecordView(View):
     def get(self, request):
         if request.user.is_authenticated:
             categories = Category.objects.filter(user=request.user)
@@ -32,9 +30,9 @@ class RecordView(View):
                     'form': form,
                     'categories': category_serializer.data
                 }
-                return render(request, 'record.html', context)
+                return render(request, 'create_record.html', context)
             else:
-                return redirect('/records/category')
+                return redirect('/records/categories/register')
         else:
             return redirect('/accounts/login')
     
@@ -54,15 +52,12 @@ class RecordView(View):
                 if serializer.is_valid():
                     messages.success(request, 'Record saved')
                     serializer.save()
-                    return redirect('/records/dashboard')
+                    return redirect('/records/')
                 else:
-                    print(serializer.errors)
-                    print("SERIALIZER INVALID")
                     for field in serializer.errors:
                         for error in serializer.errors[field]:
                             messages.error(request, '{0}: {1}'.format(field.capitalize(), error.capitalize()))
             else:
-                print("FORM INVALID")
                 errors = form.errors.as_data()
                 for field in errors:
                     for validation_error in errors[field]:
@@ -75,18 +70,30 @@ class RecordView(View):
                     'form': form,
                     'categories': category_serializer.data
                 }
-                return render(request, 'record.html', context)
+                return render(request, 'create_record.html', context)
             else:
-                return redirect('/records/category')
+                return redirect('/records/categories/register')
         else:
             return redirect('/accounts/login')
         
 class CategoryView(View):
     def get(self, request):
         if request.user.is_authenticated:
+            categories = Category.objects.filter(user=request.user)
+            category_serializer = CategorySerializer(categories, many=True)
+            context = {
+                'categories': category_serializer.data
+            }
+            return render(request, 'categories.html', context)
+        else:
+            return redirect('/accounts/login')
+        
+class CreateCategoryView(View):
+    def get(self, request):
+        if request.user.is_authenticated:
             form = CategoryForm()
             context = {'form': form}
-            return render(request, 'category.html', context)
+            return render(request, 'create_category.html', context)
         else:
             return redirect('/accounts/login')
     
@@ -104,7 +111,7 @@ class CategoryView(View):
                 if serializer.is_valid():
                     serializer.save()
                     messages.success(request, 'Category saved')
-                    return redirect('/records/dashboard')
+                    return redirect('/records/categories')
                 else:
                     for field in serializer.errors:
                         for error in serializer.errors[field]:
@@ -115,6 +122,7 @@ class CategoryView(View):
                     for validation_error in errors[field]:
                         for error in validation_error:
                             messages.error(request, '{0}: {1}'.format(field.capitalize(), error.capitalize()))
-            return render(request, 'category.html', {'form': form})
+            return render(request, 'create_category.html', {'form': form})
         else:
             return redirect('/accounts/login')
+        

@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+
+<h1>Records</h1>
+<a class="btn btn-primary" href="/records/register">Add Record</a>
+
+{% if records %}
+<ul>
+    {% for record in records %}
+    <li>{{record}}</li>
+    {% endfor %}
+</ul>
+{% endif %}
+
+{% endblock %}

@@ -1,8 +1,9 @@
 from django.urls import path
-from records.views import dashboard, RecordView, CategoryView
+from records.views import RecordView, CreateRecordView, CategoryView, CreateCategoryView
 
 urlpatterns = [
-    path('dashboard', dashboard, name='dashboard'),
-    path('record', RecordView.as_view(), name='record'),
-    path('category', CategoryView.as_view(), name='category'),
+    path('', RecordView.as_view(), name='records'),
+    path('register', CreateRecordView.as_view(), name='register_record'),
+    path('categories/', CategoryView.as_view(), name='categories'),
+    path('categories/register', CreateCategoryView.as_view(), name='register_category'),
 ]

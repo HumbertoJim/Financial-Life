@@ -1,94 +1,72 @@
 {% extends "base.html" %}
-{% block title %}Income{% endblock %}
+{% block title %}New Record{% endblock %}
 
 {% block content %}
 <div class="mx-auto" style="width: 30%">
     <div>
-        <h1 style="text-align: center;">Income</h1>
+        <h1 id="record-title" style="text-align: center;">Record</h1>
     </div>
+
     <hr id="line" style="height: 1%;">
+
     <form method="post" action="/records/record" class="form-horizontal">
         {% csrf_token %}
-        <div class="mb-3">
-            <label for="title" class="form-label">Title</label>
-            <input type="text" class="form-control" name="title" id="title" placeholder="Enter name" value="{{form.title.value}}" foo>
-        </div>
-        <div class="mb-3">
-            <label for="is_income" class="form-label">Type</label>
-            <select class="form-control" name="is_income" id="is_income" value="{{form.is_income.value}}" foo>
-                <option value=0>Expense</option>
-                <option value=1>Income</option>
-            </select>
-        </div>
-        <div class="mb-3">
-            <label for="category" class="form-label">Category</label>
-            <select class="form-control" name="category" id="category" foo>
-                {% for category in categories %}
-                <option
-                    value={{category.id}}
-                    style="background-color: {{category.color}};"
-                    {% if form.category.value == category.id %}
-                    selected
-                    {% endif %}>{{category.name}}
-                </option>
-                {% endfor %}
-            </select>
-        </div>
-        <div class="mb-3">
-            <label for="value" class="form-label">Value ($)</label>
-            <div class="input-group">
-                <span class="input-group-text">$</span>
-                <input type="number" class="form-control" name="value" id="value" placeholder="Enter ammount" value="{{form.value.value}}"
-                    min="0.00" max="10000.00" step="100.00" pattern="\d+(\.\d{1,2})?" foo>
-            </div>
-        </div>
-        <div class="mb-3">
-            <label for="description" class="form-label">Description</label>
-            <input type="text" class="form-control" name="description" id="description" placeholder="Enter description" value="{{form.description.value}}">
-        </div>
+        {{form.as_p}}
+        
         <button type="submit" class="btn btn-success">Save</button>
-        <a class="btn btn-danger" >Cancel</a>
+        <a class="btn btn-danger" href="/records/">Cancel</a>
     </form>
-    
-    <hr id="line-2" style="height: 1%;">
 
 </div>
 
 <script>
-    function adjustBrightness(hex, factor) {
-    // Parsea el color hexadecimal a RGB
-    const bigint = parseInt(hex.replace(/^#/, ''), 16);
-    const r = (bigint >> 16) & 255;
-    const g = (bigint >> 8) & 255;
-    const b = bigint & 255;
-
-    // Calcula nuevos valores RGB aclarados
-    const adjustedR = Math.min(255, r + (255 - r) * factor);
-    const adjustedG = Math.min(255, g + (255 - g) * factor);
-    const adjustedB = Math.min(255, b + (255 - b) * factor);
-
-    // Convierte los valores RGB nuevamente a hexadecimal
-    return `#${Math.round(adjustedR).toString(16).padStart(2, '0')}${Math.round(adjustedG).toString(16).padStart(2, '0')}${Math.round(adjustedB).toString(16).padStart(2, '0')}`;
-}
-
-
-
-    const select = document.getElementById('category');
     const line = document.getElementById('line');
-    const line2 = document.getElementById('line-2');
-    select.addEventListener('change', function () {
-        const selectedOption = select.options[select.selectedIndex];
-        const backgroundColor = selectedOption.style.backgroundColor;
-        select.style.borderColor = backgroundColor;
-        line.style.backgroundColor = backgroundColor;
-        line2.style.backgroundColor = backgroundColor;
+    const title = document.getElementById('record-title');
+    const select = document.getElementById('id_category');
+    if(select)
+    {
+        select.addEventListener('change', function () {
+            
+            const selectedValue = select.value;
+            title.textContent = select.value;
+
+            let color = null;
+            {% for category in categories %}
+            {% if category.name == select.value  %}
+                color = {{category.color}}            
+            {% endif %}
+            color = {{category.color}};
+            {% endfor %}
+
+            title.textContent = select.value;
+            if (color && false) {
+                select.style.backgroundColor = matchingCategory.color;
+                line.style.backgroundColor = matchingCategory.color;
+                title.textContent = select.value;
+            }
+            else
+            {
+                title.textContent = 'Not found';
+            }
+        });
+    }
+    else
+    {
+        title.textContent = 'Not found';
+    }
+</script>
+
+
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.5.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/moment@2.29.1/min/moment.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tempusdominus-bootstrap-4@5.39.0/build/js/tempusdominus-bootstrap-4.min.js"></script>
+
+<script>
+    $(function () {
+        $('#datetimepicker').datetimepicker();
     });
-    const defaultOption = select.options[select.selectedIndex];
-    const backgroundColor = defaultOption.style.backgroundColor;
-    
-    select.style.borderColor = backgroundColor;
-    line.style.backgroundColor = backgroundColor;
-    line2.style.backgroundColor = backgroundColor;
 </script>
 
 

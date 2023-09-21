@@ -21,7 +21,6 @@ class CategorySerializer(serializers.ModelSerializer):
     
     def to_representation(self, instance):
         representation = {
-            'id': instance.id,
             'name': instance.name,
             'description': instance.description,
             'color': instance.color,
@@ -30,7 +29,7 @@ class CategorySerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Category
-        fields =['id', 'name', 'description', 'color', 'user']
+        fields =['name', 'description', 'color', 'user']
 
 class RecordSerializer(serializers.ModelSerializer):
     is_income = serializers.IntegerField()
@@ -56,7 +55,7 @@ class RecordSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Record
-        fields =['title', 'description', 'value', 'is_income', 'category', 'user']
+        fields =['title', 'description', 'datetime', 'value', 'is_income', 'category', 'user']
         extra_kwargs = {
             'description': {'allow_blank':True}
         }

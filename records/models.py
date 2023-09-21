@@ -14,9 +14,13 @@ class Category(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    def __str__(self) -> str:
+        return self.name
+
 
 class Record(models.Model):
     title = models.CharField(max_length=50)
+    datetime = models.DateTimeField()
     description = models.TextField(default="")
     value = models.FloatField(default=0, validators=[MinValueValidator(0.0)])
     

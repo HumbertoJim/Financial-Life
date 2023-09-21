@@ -24,12 +24,9 @@ class CreateRecordView(View):
         if request.user.is_authenticated:
             categories = Category.objects.filter(user=request.user)
             if categories.exists():
-                category_serializer = CategorySerializer(categories, many=True)
-                form = RecordForm()
-                context = {
-                    'form': form,
-                    'categories': category_serializer.data
-                }
+                form = RecordForm(categories)
+                categories_serializer = CategorySerializer(categories, many=True)
+                context = {'form': form, 'categories': categories_serializer.data}
                 return render(request, 'create_record.html', context)
             else:
                 return redirect('/records/categories/register')

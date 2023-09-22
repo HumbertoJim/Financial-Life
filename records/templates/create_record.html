@@ -23,36 +23,33 @@
     const line = document.getElementById('line');
     const title = document.getElementById('record-title');
     const select = document.getElementById('id_category');
-    if(select)
-    {
+
+    const categories = {
+        {% for category in categories %}
+        "{{ category.name }}": "{{ category.color }}",
+        {% endfor %}
+    };
+
+    if(categories)
+    {   
+        const categoryOptions = select.getElementsByTagName('option');
+        for (const option of categoryOptions) {
+            option.style.backgroundColor = categories[option.value] || "#ffffff";
+        }
+        select.style.backgroundColor = select.value;
+
         select.addEventListener('change', function () {
-            
-            const selectedValue = select.value;
-            title.textContent = select.value;
-
-            let color = null;
-            {% for category in categories %}
-            {% if category.name == select.value  %}
-                color = {{category.color}}            
-            {% endif %}
-            color = {{category.color}};
-            {% endfor %}
-
-            title.textContent = select.value;
-            if (color && false) {
-                select.style.backgroundColor = matchingCategory.color;
-                line.style.backgroundColor = matchingCategory.color;
-                title.textContent = select.value;
+            const color = categories[select.value];
+            if (color) {
+                select.style.backgroundColor = color;
+                line.style.backgroundColor = color;
             }
             else
             {
-                title.textContent = 'Not found';
+                select.style.backgroundColor = "#ffffff";
+                line.style.backgroundColor = "#000000";
             }
         });
-    }
-    else
-    {
-        title.textContent = 'Not found';
     }
 </script>
 

@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+{% block title %}New Record{% endblock %}
+
+{% block content %}
+<div class="mx-auto col-10 col-md-4">
+    <div>
+        <h1 id="record-title" style="text-align: center;">Record</h1>
+    </div>
+
+    <hr id="line" style="height: 1%;">
+
+    <form class="form-horizontal" method="post" {%if record_id %} action="/records/{{record_id}}/edit" {%else%} action="/records/register" {%endif%}>
+        {% csrf_token %}
+        
+        {{ form.non_field_errors }}
+
+        <div class="form-group mb-3">
+            <b>{{ form.title.label_tag }}</b>
+            {{ form.title.errors }}
+            {{ form.title }}
+        </div>
+
+        <div class="form-group mb-3">
+            <b>{{ form.is_income.label_tag }}</b>
+            {{ form.is_income.errors }}
+            {{ form.is_income }}
+        </div>
+
+        <div class="form-group mb-3">
+            <b>{{ form.category.label_tag }}</b>
+            {{ form.category.errors }}
+            <div class="input-group mb-3">
+                <span class="input-group-text" id="id_category_span">#</span>
+                {{ form.category }}
+            </div>
+        </div>
+
+        <div class="form-group mb-3">
+            <b>{{ form.datetime.label_tag }}</b>
+            {{ form.datetime.errors }}
+            {{ form.datetime }}
+        </div>
+
+        <div class="form-group mb-3">
+            <b>{{ form.value.label_tag }}</b>
+            {{ form.value.errors }}
+            {{ form.value }}
+        </div>
+        
+        <div class="form-group mb-3">
+            <b>{{ form.description.label_tag }}</b>
+            {{ form.description.errors }}
+            {{ form.description }}
+        </div>
+        
+        <button type="submit" class="btn btn-success">Save</button>
+        <a class="btn btn-danger" href="/records/">Cancel</a>
+    </form>
+
+</div>
+
+<script>
+    const select = document.getElementById('id_category');
+    const span = document.getElementById('id_category_span');
+    const line = document.getElementById('line');
+
+    const categories = {
+        {% for category in categories %} "{{ category.name }}": "{{ category.color }}", {% endfor %}
+    };
+
+    if(categories)
+    {   
+        const categoryOptions = select.getElementsByTagName('option');
+
+        for (const option of categoryOptions) {
+            option.style.backgroundColor = categories[option.value] || "#ffffff";
+        }
+
+        select.addEventListener('change', function () {
+            span.style.backgroundColor = categories[select.value] || "#ffffff";
+            line.style.backgroundColor = categories[select.value] || "#000000";
+        });
+
+        span.style.backgroundColor = categories[select.value] || "#ffffff";
+        line.style.backgroundColor = categories[select.value] || "#000000";
+    }
+</script>
+
+
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.5.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/moment@2.29.1/min/moment.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tempusdominus-bootstrap-4@5.39.0/build/js/tempusdominus-bootstrap-4.min.js"></script>
+
+<script>
+    $(function () {
+        $('#datetimepicker').datetimepicker();
+    });
+</script>
+
+
+{% endblock %}

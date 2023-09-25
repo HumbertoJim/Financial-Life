@@ -1,32 +1,28 @@
-from collections.abc import Mapping
-from typing import Any
 from django import forms
-from django.core.files.base import File
-from django.db.models.base import Model
-from django.forms.utils import ErrorList
+import datetime
 
-from records.models import Category
+from records.models import Category, Record
 
 class CategoryForm(forms.ModelForm):
     color = forms.ChoiceField(
-        initial='#5499C7',
         label='Color',
         choices=[
-            ('#5499C7', '#5499C7'),
-            ('#48C9B0', '#48C9B0'),
-            ('#58D68D', '#58D68D'),
-            ('#F4D03F', '#F4D03F'),
-            ('#DC7633', '#DC7633'),
-            ('#EC7063', '#EC7063'),
-            ('#F0F3F4', '#F0F3F4'),
-            ('#AAB7B8', '#AAB7B8'),
-            ('#5D6D7E', '#5D6D7E')
+            ('#E6B0AA', 'E6B0AA'),
+            ('#D7BDE2', 'D7BDE2'),
+            ('#A9CCE3', 'A9CCE3'),
+            ('#A3E4D7', 'A3E4D7'),
+            ('#A9DFBF', 'A9DFBF'),
+            ('#F9E79F', 'F9E79F'),
+            ('#F5CBA7', 'F5CBA7'),
+            ('#ABB2B9', 'ABB2B9'),
+            ('#CCD1D1', 'CCD1D1'),
+            ('#E5E7E9', 'E5E7E9'),
         ],
-        widget=forms.Select(attrs={'class': 'form-control'})
+        widget=forms.Select(attrs={'class':'form-control'})
     )
     class Meta:
         model = Category
-        fields = ['name', 'description', 'color']
+        fields = ['name', 'color', 'description']
         labels = {
             'name': 'Name',
             'description': 'Description'
@@ -41,7 +37,7 @@ class CategoryForm(forms.ModelForm):
         }
 
 
-class RecordForm(forms.Form):
+class RecordForm(forms.ModelForm):
     title = forms.CharField(
         initial='',
         label='Title',
@@ -66,6 +62,11 @@ class RecordForm(forms.Form):
         label='Amount ($)',
         widget=forms.TextInput(attrs={'class':'form-control'})
     )
+    datetime = forms.DateTimeField(
+        initial='',
+        label='Date and Time',
+        widget=forms.DateTimeInput(attrs={'class':'form-control', 'type': 'datetime-local'})
+    )
     description = forms.CharField(
         initial='',
         label='Description',
@@ -78,11 +79,28 @@ class RecordForm(forms.Form):
         if value < 0:
             raise forms.ValidationError({'value': 'Amount can not be negative'})
         return value
+    
+    class Meta:
+        model = Record
+        fields = ['title', 'is_income', 'category', 'value', 'datetime', 'description']
 
-    def __init__(self, categories, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
+
+        if 'categories' not in kwargs:
+            raise Category.DoesNotExist()
+
+        categories = kwargs.pop('categories')
+        print(categories)
+
         initial = kwargs.get('initial', {})
-        initial['category'] = categories.first().name
-        kwargs['initial'] = initial
+        
+        now = datetime.datetime.now()
+        initial['datetime'] = datetime.datetime(now.year, now.month, now.day, 12)
+        
+        print(kwargs.get('categories'))
+        # initial['category'] = kwargs.get('categories')['name']
+        
+        kwargs['initial'] = initial        
 
         super().__init__(*args, **kwargs)
 

@@ -4,122 +4,120 @@ from django.views import View
 
 from records.models import Record, Category
 from records.forms import RecordForm, CategoryForm
-from records.serializers import RecordSerializer, CategorySerializer
+
+from main.exceptions import NotAuthenticated, DuplicatedValue
 
 # Create your views here.
-class RecordView(View):
+class RecordListView(View):
     def get(self, request):
-        if request.user.is_authenticated:
-            records = Record.objects.filter(user=request.user).order_by('-created_at')
-            record_serializer = RecordSerializer(records, many=True)
-            context = {
-                'records': record_serializer.data,
-            }
+        try:
+            if not request.user.is_authenticated:
+                raise NotAuthenticated()
+            records = Record.objects.filter(user=request.user).select_related('category').order_by('-created_at')
+            records = records.values('id', 'title', 'description', 'datetime', 'value', 'is_income', 'category__name', 'category__color')
+            context = { 'records': records }
             return render(request, 'records.html', context)
-        else:
+        except NotAuthenticated:
             return redirect('/accounts/login')
     
-class CreateRecordView(View):
-    def get(self, request):
-        if request.user.is_authenticated:
+class RecordView(View):
+    def get(self, request, record_id=None):
+        try:
+            if not request.user.is_authenticated:
+                raise NotAuthenticated()
             categories = Category.objects.filter(user=request.user)
-            if categories.exists():
-                form = RecordForm(categories)
-                categories_serializer = CategorySerializer(categories, many=True)
-                context = {'form': form, 'categories': categories_serializer.data}
-                return render(request, 'create_record.html', context)
-            else:
-                return redirect('/records/categories/register')
-        else:
+            if not categories.exists():
+                raise Category.DoesNotExist()
+            categories = categories.values('name', 'color')
+            record = Record() if record_id == None else Record.objects.filter(user=request.user).get(id=record_id)
+            form = RecordForm(instance=record, categories=categories)
+            context = {'form': form, 'categories': categories}
+            return render(request, 'record.html', context)
+        except NotAuthenticated:
             return redirect('/accounts/login')
-    
-    def post(self, request):
-        if request.user.is_authenticated:
-            form = RecordForm(request.POST)
+        except Record.DoesNotExist:
+            messages.error(request, 'Error, invalid record')
+            return redirect('/records/')
+        except Category.DoesNotExist:
+            messages.warning(request, 'You have not registered any category, please add one first.')
+            return redirect('/records/categories/register')
+        
+    def post(self, request, record_id=None):
+        try:
+            if not request.user.is_authenticated:
+                raise NotAuthenticated()
+            categories = Category.objects.filter(user=request.user)
+            if not categories.exists():
+                print("F")
+                raise Category.DoesNotExist()
+            print("NoF")
+            categories = categories.values('name', 'color')
+            record = Record(user=request.user) if record_id == None else Record.objects.filter(user=request.user).get(id=record_id)
+            form = RecordForm(request.POST, instance=record, categories=categories)
             if form.is_valid():
-                data = {
-                    'title': form.cleaned_data.get('title'),
-                    'description': form.cleaned_data.get('description', ''),
-                    'value': form.cleaned_data.get('value'),
-                    'is_income': form.cleaned_data.get('is_income'),
-                    'category': form.cleaned_data.get('category'),
-                    'user': request.user.id
-                }
-                serializer = RecordSerializer(data=data)
-                if serializer.is_valid():
-                    messages.success(request, 'Record saved')
-                    serializer.save()
-                    return redirect('/records/')
-                else:
-                    for field in serializer.errors:
-                        for error in serializer.errors[field]:
-                            messages.error(request, '{0}: {1}'.format(field.capitalize(), error.capitalize()))
-            else:
-                errors = form.errors.as_data()
-                for field in errors:
-                    for validation_error in errors[field]:
-                        for error in validation_error:
-                            messages.error(request, '{0}: {1}'.format(field.capitalize(), error.capitalize()))
-            categories = Category.objects.filter(user=request.user)
-            if categories.exists():
-                category_serializer = CategorySerializer(categories, many=True)
-                context = {
-                    'form': form,
-                    'categories': category_serializer.data
-                }
-                return render(request, 'create_record.html', context)
-            else:
-                return redirect('/records/categories/register')
-        else:
+                form.save()
+                messages.success(request, 'Record saved')
+                return redirect('/records/')
+            context = {'form': form, 'categories': categories}
+            return render(request, 'records.html', context)
+        except NotAuthenticated:
             return redirect('/accounts/login')
+        except Record.DoesNotExist:
+            messages.error(request, 'Error, invalid record')
+            return redirect('/records/')
+        except Category.DoesNotExist:
+            messages.warning(request, 'You have not registered any category, please add one first.')
+            return redirect('/records/categories/register')
+        
+class CategoryListView(View):
+    def get(self, request):
+        try:
+            if not request.user.is_authenticated:
+                raise NotAuthenticated()
+            categories = Category.objects.filter(user=request.user)
+            categories = categories.values('id', 'name', 'description', 'color')
+            context = {'categories': categories}
+            return render(request, 'categories.html', context)
+        except NotAuthenticated:
+            return redirect('/accounts/login')
+
         
 class CategoryView(View):
-    def get(self, request):
-        if request.user.is_authenticated:
-            categories = Category.objects.filter(user=request.user)
-            category_serializer = CategorySerializer(categories, many=True)
-            context = {
-                'categories': category_serializer.data
-            }
-            return render(request, 'categories.html', context)
-        else:
+    def get(self, request, category_id=None):
+        try:
+            if not request.user.is_authenticated:
+                raise NotAuthenticated()
+            category = Category() if category_id == None else Category.objects.filter(user=request.user).get(id=category_id)
+            form = CategoryForm(instance=category)
+            context = {'form': form, 'category_id': category.id}
+            return render(request, 'category.html', context)
+        except NotAuthenticated:
             return redirect('/accounts/login')
-        
-class CreateCategoryView(View):
-    def get(self, request):
-        if request.user.is_authenticated:
-            form = CategoryForm()
-            context = {'form': form}
-            return render(request, 'create_category.html', context)
-        else:
-            return redirect('/accounts/login')
+        except Category.DoesNotExist:
+            messages.warning(request, 'Invalid category')
+            return redirect('/records/categories/')
     
-    def post(self, request):
-        if request.user.is_authenticated:
-            form = CategoryForm(request.POST)
+    def post(self, request, category_id=None):
+        try:
+            if not request.user.is_authenticated:
+                raise NotAuthenticated()
+            category = Category(user=request.user) if category_id == None else Category.objects.filter(user=request.user).get(id=category_id)
+            form = CategoryForm(request.POST, instance=category)
             if form.is_valid():
-                data = {
-                    'name': form.cleaned_data.get('name'),
-                    'description': form.cleaned_data.get('description'),
-                    'color': form.cleaned_data.get('color'),
-                    'user': request.user.id
-                }
-                serializer = CategorySerializer(data=data)
-                if serializer.is_valid():
-                    serializer.save()
-                    messages.success(request, 'Category saved')
-                    return redirect('/records/categories')
+                user_categories = Category.objects.filter(user=request.user)
+                if category_id:
+                    user_categories = user_categories.exclude(id=category_id)
+                if user_categories.filter(name=form.cleaned_data['name']).exists():
+                    form.add_error('name', 'Name in use')
                 else:
-                    for field in serializer.errors:
-                        for error in serializer.errors[field]:
-                            messages.error(request, '{0}: {1}'.format(field.capitalize(), error.capitalize()))
-            else:
-                errors = form.errors.as_data()
-                for field in errors:
-                    for validation_error in errors[field]:
-                        for error in validation_error:
-                            messages.error(request, '{0}: {1}'.format(field.capitalize(), error.capitalize()))
-            return render(request, 'create_category.html', {'form': form})
-        else:
+                    form.save()
+                    messages.success(request, 'Category saved')
+                    return redirect('/records/categories/')
+            context = {'form': form}
+            return render(request, 'category.html', context)
+        except NotAuthenticated:
             return redirect('/accounts/login')
-        
+        except Category.DoesNotExist:
+            messages.warning(request, 'Invalid category')
+            return redirect('/records/categories/')
+    

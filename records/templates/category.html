@@ -9,9 +9,32 @@
     
     <hr id="line" style="height: 1%;">
 
-    <form method="post" action="/records/categories/register" class="form-horizontal">
+    <form class="form-horizontal" method="post" {%if category_id %} action="/records/categories/{{category_id}}/edit" {%else%} action="/records/categories/register" {%endif%}>
         {% csrf_token %}
-        {{form.as_p}}
+        
+        {{ form.non_field_errors }}
+        
+        <div class="form-group mb-3">
+            <b>{{form.name.label_tag}}</b>
+            {{form.name.errors}}
+            {{form.name}}
+        </div>
+        
+        <div class="form-group mb-3">
+            <b>{{ form.description.label_tag }}</b>
+            {{form.description.errors}}
+            {{form.description}}
+        </div>
+        
+        <div class="form-group mb-3">
+            <b>{{form.color.label_tag}}</b>
+            {{ form.color.errors }} 
+            <div class="input-group">
+                <span class="input-group-text" id="id_color_span">#</span>
+                {{form.color}}
+            </div>
+        </div>
+
         <button type="submit" class="btn btn-success">Save</button>
         <a class="btn btn-danger" href="/records/categories/">Cancel</a>
     </form>
@@ -30,12 +53,13 @@
 
 <script>
     const select = document.getElementById('id_color');
+    const span = document.getElementById('id_color_span');
     const line = document.getElementById('line');
     select.addEventListener('change', function () {
-        select.style.backgroundColor = select.value;
+        span.style.backgroundColor = select.value;
         line.style.backgroundColor = select.value;
     });
-    select.style.backgroundColor = select.value;
+    span.style.backgroundColor = select.value;
     line.style.backgroundColor = select.value;
 </script>
 {% endblock %}

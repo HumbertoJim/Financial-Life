@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-10"><h1>Records</h1></div>
+        <div class="col-md-2"><a class="btn btn-success" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; " href="/records/register">Add Record</a></div>
+    </div>
+
+    <table class="table">
+        <thead>
+            <th>Title</th>
+            <th>Type</th>
+            <th>Category</th>
+            <th>Amount</th>
+            <th>Date</th>
+            <th></th>
+            <th></th>
+        </thead>
+        <tbody>
+            {% if records %}
+            {% for record in records %}
+            <tr>
+                <th>{{record.title}}</td>
+                <td>{% if record.is_income == 1%}Income{% else %}Expense{% endif%}</td>
+                <td><a class="btn" style="background-color: {{record.category__color}};">{{record.category__name}}</a></td>
+                <td>{{record.value}}</td>
+                <td>{{record.datetime}}</td>
+                <td><a class="btn btn-primary" href="/records/{{record.id}}/edit">Edit</a></td>
+                <td><a class="btn btn-danger" href="/records/{{record.id}}/delete">Delete</a></td>
+            </tr>
+            {% endfor %}
+            {% endif %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}

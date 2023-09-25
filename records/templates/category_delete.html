@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Category{% endblock %}
+
+{% block content %}
+<div class="mx-auto col-10 col-md-4">
+    <div>
+        <h1 style="text-align: center;">Delete Category</h1>
+    </div>
+    
+    <hr id="line" style="height: 1%; background-color: {{category.color}};">
+
+    <form class="form-horizontal" method="post" action="/records/categories/{{category.id}}/delete">
+        {% csrf_token %}
+        
+        {{ form.non_field_errors }}
+        
+        <div class="form-group mb-3">
+            <b>Name</b>
+            <p class="form-control">"{{category.name}}"</p>
+        </div>
+        
+        <div class="form-group mb-3">
+            <b>Description</b>
+            <p class="form-control">"{{category.description}}"</p>
+        </div>
+        
+        <div class="form-group mb-3">
+            <b>Color</b>
+            <p class="form-control" style="background-color: {{category.color}};">{{category.color}}</p>
+        </div>
+
+        <button type="submit" class="btn btn-secondary">Delete</button>
+        <a class="btn btn-danger" href="/records/categories/">Cancel</a>
+    </form>
+</div>
+
+{% endblock %}

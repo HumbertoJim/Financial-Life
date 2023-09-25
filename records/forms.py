@@ -90,15 +90,11 @@ class RecordForm(forms.ModelForm):
             raise Category.DoesNotExist()
 
         categories = kwargs.pop('categories')
-        print(categories)
 
         initial = kwargs.get('initial', {})
         
         now = datetime.datetime.now()
         initial['datetime'] = datetime.datetime(now.year, now.month, now.day, 12)
-        
-        print(kwargs.get('categories'))
-        # initial['category'] = kwargs.get('categories')['name']
         
         kwargs['initial'] = initial        
 

@@ -3,6 +3,7 @@ from django.shortcuts import render, redirect
 from django.views import View
 
 from accounts.forms import LoginForm
+from main.exceptions import NotAuthenticated
 
 # Create your views here.
 class Login(View):
@@ -34,3 +35,12 @@ def logout(request):
     if request.user.is_authenticated:
         auth.logout(request)
     return redirect('/')
+
+class Profile(View):
+    def get(self, request):
+        try:
+            if not request.user.is_authenticated:
+                raise NotAuthenticated()
+            return render(request, 'profile.html')
+        except NotAuthenticated:
+            return redirect('/accounts/login')

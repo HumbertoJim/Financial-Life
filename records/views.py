@@ -5,7 +5,7 @@ from django.views import View
 from records.models import Record, Category
 from records.forms import RecordForm, CategoryForm
 
-from main.exceptions import NotAuthenticated, DuplicatedValue
+from main.exceptions import NotAuthenticated
 
 # Create your views here.
 class RecordListView(View):
@@ -16,10 +16,10 @@ class RecordListView(View):
             records = Record.objects.filter(user=request.user).select_related('category').order_by('-created_at')
             records = records.values('id', 'title', 'description', 'datetime', 'value', 'is_income', 'category__name', 'category__color')
             context = { 'records': records }
-            return render(request, 'records.html', context)
+            return render(request, 'record_list.html', context)
         except NotAuthenticated:
             return redirect('/accounts/login')
-    
+
 class RecordView(View):
     def get(self, request, record_id=None):
         try:
@@ -28,10 +28,13 @@ class RecordView(View):
             categories = Category.objects.filter(user=request.user)
             if not categories.exists():
                 raise Category.DoesNotExist()
-            categories = categories.values('name', 'color')
             record = Record() if record_id == None else Record.objects.filter(user=request.user).get(id=record_id)
             form = RecordForm(instance=record, categories=categories)
-            context = {'form': form, 'categories': categories}
+            context = {
+                'form': form,
+                'categories': categories.values('name', 'color'),
+                'record_id': record_id
+            }
             return render(request, 'record.html', context)
         except NotAuthenticated:
             return redirect('/accounts/login')
@@ -48,18 +51,19 @@ class RecordView(View):
                 raise NotAuthenticated()
             categories = Category.objects.filter(user=request.user)
             if not categories.exists():
-                print("F")
                 raise Category.DoesNotExist()
-            print("NoF")
-            categories = categories.values('name', 'color')
             record = Record(user=request.user) if record_id == None else Record.objects.filter(user=request.user).get(id=record_id)
             form = RecordForm(request.POST, instance=record, categories=categories)
             if form.is_valid():
-                form.save()
-                messages.success(request, 'Record saved')
+                record = form.save(commit=False)
+                if record.category.user == request.user:
+                    record.save()
+                    messages.success(request, 'Record saved')
+                else:
+                    messages.error(request, 'Invalid category, record not saved')
                 return redirect('/records/')
-            context = {'form': form, 'categories': categories}
-            return render(request, 'records.html', context)
+            context = {'form': form, 'categories': categories.values('name', 'color')}
+            return render(request, 'record.html', context)
         except NotAuthenticated:
             return redirect('/accounts/login')
         except Record.DoesNotExist:
@@ -68,7 +72,47 @@ class RecordView(View):
         except Category.DoesNotExist:
             messages.warning(request, 'You have not registered any category, please add one first.')
             return redirect('/records/categories/register')
+
+
+class RecordDeleteView(View):
+    def get(self, request, record_id):
+        try:
+            if not request.user.is_authenticated:
+                raise NotAuthenticated()
+            record = Record.objects.filter(user=request.user).get(id=record_id)
+            context = {
+                'record': {
+                    'id': record.id,
+                    'title': record.title,
+                    'value': record.value,
+                    'datetime': record.datetime,
+                    'is_income': record.is_income,
+                    'category__name': '' if record.category == None else record.category.name,
+                    'category__color': '#ffffff' if record.category == None else record.category.color
+                }
+            }
+            return render(request, 'record_delete.html', context)
+        except NotAuthenticated:
+            return redirect('/accounts/login')
+        except Record.DoesNotExist:
+            messages.error(request, 'Error, invalid record')
+            return redirect('/records/')
         
+    def post(self, request, record_id=None):
+        try:
+            if not request.user.is_authenticated:
+                raise NotAuthenticated()
+            record = Record.objects.filter(user=request.user).get(id=record_id)
+            record.delete()
+            messages.success(request, 'Record deleted')
+            return redirect('/records/')
+        except NotAuthenticated:
+            return redirect('/accounts/login')
+        except Record.DoesNotExist:
+            messages.error(request, 'Error, invalid record')
+            return redirect('/records/')
+
+
 class CategoryListView(View):
     def get(self, request):
         try:
@@ -77,11 +121,11 @@ class CategoryListView(View):
             categories = Category.objects.filter(user=request.user)
             categories = categories.values('id', 'name', 'description', 'color')
             context = {'categories': categories}
-            return render(request, 'categories.html', context)
+            return render(request, 'category_list.html', context)
         except NotAuthenticated:
             return redirect('/accounts/login')
 
-        
+
 class CategoryView(View):
     def get(self, request, category_id=None):
         try:
@@ -121,3 +165,46 @@ class CategoryView(View):
             messages.warning(request, 'Invalid category')
             return redirect('/records/categories/')
     
+class CategoryDeleteView(View):
+    def get(self, request, category_id):
+        try:
+            if not request.user.is_authenticated:
+                raise NotAuthenticated()
+            categories = Category.objects.filter(user=request.user)
+            if categories.count() > 1:
+                category = categories.get(id=category_id)
+                context = {
+                    'category': {
+                        'id': category.id,
+                        'name': category.name,
+                        'description': category.description,
+                        'color': category.color
+                    }
+                }
+                return render(request, 'category_delete.html', context)
+            else:
+                messages.error(request, 'Unable to delete the category because you must have at least one')
+                return redirect('/records/categories/')
+        except NotAuthenticated:
+            return redirect('/accounts/login')
+        except Category.DoesNotExist:
+            messages.warning(request, 'Invalid category')
+            return redirect('/records/categories/')
+    
+    def post(self, request, category_id=None):
+        try:
+            if not request.user.is_authenticated:
+                raise NotAuthenticated()
+            categories = Category.objects.filter(user=request.user)
+            if categories.count() > 1:
+                category = categories.get(id=category_id)
+                category.delete()
+                messages.success(request, 'Category deleted')
+            else:
+                messages.error(request, 'Unable to delete the category because you must have at least one')
+            return redirect('/records/categories/')
+        except NotAuthenticated:
+            return redirect('/accounts/login')
+        except Category.DoesNotExist:
+            messages.warning(request, 'Invalid category')
+            return redirect('/records/categories/')

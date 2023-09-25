@@ -2,6 +2,73 @@
 
 {% block title %}Home{% endblock %}
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 {% block content %}
-<h1>Home</h1>
+<h1 class="text-center">Home</h1>
+<br>
+
+{% if user.is_authenticated %}
+
+<h1>Gráfica</h1>
+<p>{{chart_data}}</p>
+<b id="foo">Foo</b>
+<canvas id="myChart"></canvas>
+
+<script>
+    // Datos de Python pasados a la plantilla
+    var chartData = JSON.parse('{{ chart_data|escapejs }}');
+
+    var ctx = document.getElementById('myChart').getContext('2d');
+    var datasets = [];
+
+    var foo = document.getElementById('foo');
+    foo.textContent = chartData;
+
+    // Crear un conjunto de datos para cada categoría
+    for (var category in chartData) {
+        foo.textContent = category;
+        datasets.push({
+            label: category,
+            data: chartData[category],
+            borderColor: getRandomColor(),
+            fill: false
+        });
+    }
+
+    //document.getElementById('foo').textContent = datasets;
+
+    var chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            datasets: datasets
+        },
+        options: {
+            scales: {
+                x: {
+                    type: 'time',
+                    time: {
+                        unit: 'day'
+                    }
+                },
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+
+    // Función para generar colores aleatorios
+    function getRandomColor() {
+        var letters = '0123456789ABCDEF';
+        var color = '#';
+        for (var i = 0; i < 6; i++) {
+            color += letters[Math.floor(Math.random() * 16)];
+        }
+        return color;
+    }
+</script>
+
+{% endif %}
+
 {% endblock %}

@@ -10,4 +10,61 @@
 <br>
 <h4 class="text-center">Page in developing process...</h4>
 
+
+{% if user.is_authenticated %}
+
+<div class="row">
+    <div class="col-4"></div><canvas id="expensesPerCategory"></canvas>
+    <div class="col-4"></div><canvas id="char2"></canvas>
+    <div class="col-4"></div><canvas id="chart3"></canvas>
+</div>
+
+
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const ctx = document.getElementById('expensesPerCategory').getContext('2d');
+    const chart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels : [{% for item in labels %}"{{ item }}",{% endfor %}],
+            datasets: [{
+                label: "Expenses per Category",
+                data : [{% for item in values %}{{ item }},{% endfor %}],
+            }]
+        },
+    });
+</script>
+<script>
+    const ctx2 = document.getElementById('chart2').getContext('2d');
+    const chart2 = new Chart(ctx2, {
+        type: 'bar',
+        data: {
+            labels : [{% for item in labels %}"{{ item }}",{% endfor %}],
+            datasets: [{
+                label: "Expenses per Category 2",
+                data : [{% for item in values %}{{ item }},{% endfor %}],
+            }]
+        },
+    });
+</script>
+<script>
+    const ctx3 = document.getElementById('chart3').getContext('2d');
+    const chart3 = new Chart(ctx3, {
+        type: 'bar',
+        data: {
+            labels : [{% for item in labels %}"{{ item }}",{% endfor %}],
+            datasets: [{
+                label: "Expenses per Category 3",
+                data : [{% for item in values %}{{ item }},{% endfor %}],
+            }]
+        },
+    });
+</script>
+
+{% endif %}
+
+
 {% endblock %}

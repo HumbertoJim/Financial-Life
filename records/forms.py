@@ -1,7 +1,6 @@
 from django import forms
+from records.models import Category, Income, Expense
 import datetime
-
-from records.models import Category, Record
 
 class CategoryForm(forms.ModelForm):
     color = forms.ChoiceField(
@@ -37,17 +36,11 @@ class CategoryForm(forms.ModelForm):
         }
 
 
-class RecordForm(forms.ModelForm):
+class RecordForm(forms.Form):
     title = forms.CharField(
         initial='',
         label='Title',
         widget=forms.TextInput(attrs={'class':'form-control'})
-    )
-    is_income = forms.ChoiceField(
-        initial=0,
-        choices=[(0, 'Expense'), (1, 'Income')],
-        label='Type',
-        widget=forms.Select(attrs={'class':'form-control'})
     )
     category = forms.ModelChoiceField(
         queryset=Category.objects.none(),
@@ -62,10 +55,10 @@ class RecordForm(forms.ModelForm):
         label='Amount ($)',
         widget=forms.TextInput(attrs={'class':'form-control'})
     )
-    datetime = forms.DateTimeField(
+    date = forms.DateField(
         initial='',
-        label='Date and Time',
-        widget=forms.DateTimeInput(attrs={'class':'form-control', 'type': 'datetime-local'})
+        label='Date',
+        widget=forms.DateInput(attrs={'class':'form-control', 'type': 'date'})
     )
     description = forms.CharField(
         initial='',
@@ -80,21 +73,37 @@ class RecordForm(forms.ModelForm):
             raise forms.ValidationError({'value': 'Amount can not be negative'})
         return value
     
-    class Meta:
-        model = Record
-        fields = ['title', 'is_income', 'category', 'value', 'datetime', 'description']
-
+    def save(self, commit=True):
+        if self.instance:
+            self.instance.title = self.cleaned_data.get('title')
+            self.instance.category = self.cleaned_data.get('category')
+            self.instance.date = self.cleaned_data.get('date')
+            self.instance.value = self.cleaned_data.get('value')
+            self.instance.description = self.cleaned_data.get('description')
+            if commit:
+                self.instance.save()
+            return self.instance
+        raise Exception('Unable to save form with non instance fixed')
+    
     def __init__(self, *args, **kwargs):
+
+        if 'instance' not in kwargs:
+            raise Exception('Unable to init form with non instance fixed')
 
         if 'categories' not in kwargs:
             raise Category.DoesNotExist()
+        
+        self.instance = kwargs.pop('instance')
+
+        if not (isinstance(self.instance, Income) or isinstance(self.instance, Expense)):
+            raise Exception('Instance must be an instance from Income or Expense model')
 
         categories = kwargs.pop('categories')
 
         initial = kwargs.get('initial', {})
         
-        now = datetime.datetime.now()
-        initial['datetime'] = datetime.datetime(now.year, now.month, now.day, 12)
+        today = datetime.date.today()
+        initial['date'] = datetime.date(today.year, today.month, today.day)
         
         kwargs['initial'] = initial        
 

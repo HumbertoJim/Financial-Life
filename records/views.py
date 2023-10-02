@@ -2,115 +2,219 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.views import View
 
-from records.models import Record, Category
+from records.models import Income, Expense, Category
 from records.forms import RecordForm, CategoryForm
 
 from main.exceptions import NotAuthenticated
 
 # Create your views here.
-class RecordListView(View):
+class IncomeListView(View):
     def get(self, request):
         try:
             if not request.user.is_authenticated:
                 raise NotAuthenticated()
-            records = Record.objects.filter(user=request.user).select_related('category').order_by('-created_at')
-            records = records.values('id', 'title', 'description', 'datetime', 'value', 'is_income', 'category__name', 'category__color')
-            context = { 'records': records }
-            return render(request, 'record_list.html', context)
+            incomes = Income.objects.filter(user=request.user).order_by('-date')
+            incomes = incomes.values('id', 'title', 'description', 'date', 'value', 'category__name', 'category__color')
+            context = { 'incomes': incomes }
+            return render(request, 'income_list.html', context)
         except NotAuthenticated:
             return redirect('/accounts/login')
 
-class RecordView(View):
-    def get(self, request, record_id=None):
+class IncomeView(View):
+    def get(self, request, income_id=None):
         try:
             if not request.user.is_authenticated:
                 raise NotAuthenticated()
             categories = Category.objects.filter(user=request.user)
             if not categories.exists():
                 raise Category.DoesNotExist()
-            record = Record() if record_id == None else Record.objects.filter(user=request.user).get(id=record_id)
-            form = RecordForm(instance=record, categories=categories)
+            income = Income() if income_id == None else Income.objects.filter(user=request.user).get(id=income_id)
+            form = RecordForm(instance=income, categories=categories)
             context = {
                 'form': form,
                 'categories': categories.values('name', 'color'),
-                'record_id': record_id
+                'income_id': income_id
             }
-            return render(request, 'record.html', context)
+            return render(request, 'income.html', context)
         except NotAuthenticated:
             return redirect('/accounts/login')
-        except Record.DoesNotExist:
-            messages.error(request, 'Error, invalid record')
-            return redirect('/records/')
+        except Income.DoesNotExist:
+            messages.error(request, 'Error, invalid income')
+            return redirect('/records/incomes')
         except Category.DoesNotExist:
             messages.warning(request, 'You have not registered any category, please add one first.')
             return redirect('/records/categories/register')
         
-    def post(self, request, record_id=None):
+    def post(self, request, income_id=None):
         try:
             if not request.user.is_authenticated:
                 raise NotAuthenticated()
             categories = Category.objects.filter(user=request.user)
             if not categories.exists():
                 raise Category.DoesNotExist()
-            record = Record(user=request.user) if record_id == None else Record.objects.filter(user=request.user).get(id=record_id)
-            form = RecordForm(request.POST, instance=record, categories=categories)
+            income = Income(user=request.user) if income_id == None else Income.objects.filter(user=request.user).get(id=income_id)
+            form = RecordForm(request.POST, instance=income, categories=categories)
             if form.is_valid():
-                record = form.save(commit=False)
-                if record.category.user == request.user:
-                    record.save()
-                    messages.success(request, 'Record saved')
+                income = form.save(commit=False)
+                if income.category.user == request.user:
+                    income.save()
+                    messages.success(request, 'Income saved')
                 else:
-                    messages.error(request, 'Invalid category, record not saved')
-                return redirect('/records/')
+                    messages.error(request, 'Invalid category, income was not saved')
+                return redirect('/records/incomes')
+            else:
+                messages.error(request, 'Invalid fields')
             context = {'form': form, 'categories': categories.values('name', 'color')}
-            return render(request, 'record.html', context)
+            return render(request, 'income.html', context)
         except NotAuthenticated:
             return redirect('/accounts/login')
-        except Record.DoesNotExist:
-            messages.error(request, 'Error, invalid record')
-            return redirect('/records/')
+        except Income.DoesNotExist:
+            messages.error(request, 'Error, invalid income')
+            return redirect('/records/incomes')
+        except Category.DoesNotExist:
+            messages.warning(request, 'You have not registered any category, please add one first.')
+            return redirect('/records/categoriesregister')
+
+class IncomeDeleteView(View):
+    def get(self, request, income_id):
+        try:
+            if not request.user.is_authenticated:
+                raise NotAuthenticated()
+            income = Income.objects.filter(user=request.user).get(id=income_id)
+            context = {
+                'income': {
+                    'id': income.id,
+                    'title': income.title,
+                    'value': income.value,
+                    'date': income.date,
+                    'category__name': '' if income.category == None else income.category.name,
+                    'category__color': '#ffffff' if income.category == None else income.category.color
+                }
+            }
+            return render(request, 'income_delete.html', context)
+        except NotAuthenticated:
+            return redirect('/accounts/login')
+        except Income.DoesNotExist:
+            messages.error(request, 'Error, invalid income')
+            return redirect('/records/incomes')
+        
+    def post(self, request, income_id=None):
+        try:
+            if not request.user.is_authenticated:
+                raise NotAuthenticated()
+            income = Income.objects.filter(user=request.user).get(id=income_id)
+            income.delete()
+            messages.success(request, 'Income deleted')
+            return redirect('/records/incomes')
+        except NotAuthenticated:
+            return redirect('/accounts/login')
+        except Income.DoesNotExist:
+            messages.error(request, 'Error, invalid income')
+            return redirect('/records/incomes')
+
+class ExpenseListView(View):
+    def get(self, request):
+        try:
+            if not request.user.is_authenticated:
+                raise NotAuthenticated()
+            expenses = Expense.objects.filter(user=request.user).order_by('-date')
+            expenses = expenses.values('id', 'title', 'description', 'date', 'value', 'category__name', 'category__color')
+            context = { 'expenses': expenses }
+            return render(request, 'expense_list.html', context)
+        except NotAuthenticated:
+            return redirect('/accounts/login')
+
+class ExpenseView(View):
+    def get(self, request, expense_id=None):
+        try:
+            if not request.user.is_authenticated:
+                raise NotAuthenticated()
+            categories = Category.objects.filter(user=request.user)
+            if not categories.exists():
+                raise Category.DoesNotExist()
+            expense = Expense() if expense_id == None else Expense.objects.filter(user=request.user).get(id=expense_id)
+            form = RecordForm(instance=expense, categories=categories)
+            context = {
+                'form': form,
+                'categories': categories.values('name', 'color'),
+                'expense_id': expense_id
+            }
+            return render(request, 'expense.html', context)
+        except NotAuthenticated:
+            return redirect('/accounts/login')
+        except Expense.DoesNotExist:
+            messages.error(request, 'Error, invalid expense')
+            return redirect('/records/expenses')
         except Category.DoesNotExist:
             messages.warning(request, 'You have not registered any category, please add one first.')
             return redirect('/records/categories/register')
-
-
-class RecordDeleteView(View):
-    def get(self, request, record_id):
+        
+    def post(self, request, expense_id=None):
         try:
             if not request.user.is_authenticated:
                 raise NotAuthenticated()
-            record = Record.objects.filter(user=request.user).get(id=record_id)
+            categories = Category.objects.filter(user=request.user)
+            if not categories.exists():
+                raise Category.DoesNotExist()
+            expense = Expense(user=request.user) if expense_id == None else Expense.objects.filter(user=request.user).get(id=expense_id)
+            form = RecordForm(request.POST, instance=expense, categories=categories)
+            if form.is_valid():
+                expense = form.save(commit=False)
+                if expense.category.user == request.user:
+                    expense.save()
+                    messages.success(request, 'Expense saved')
+                else:
+                    messages.error(request, 'Invalid category, expense was not saved')
+                return redirect('/records/expenses')
+            else:
+                messages.error(request, 'Invalid fields')
+            context = {'form': form, 'categories': categories.values('name', 'color')}
+            return render(request, 'expense.html', context)
+        except NotAuthenticated:
+            return redirect('/accounts/login')
+        except Expense.DoesNotExist:
+            messages.error(request, 'Error, invalid expense')
+            return redirect('/records/expenses')
+        except Category.DoesNotExist:
+            messages.warning(request, 'You have not registered any category, please add one first.')
+            return redirect('/expenses/categories/register')
+
+class ExpenseDeleteView(View):
+    def get(self, request, expense_id):
+        try:
+            if not request.user.is_authenticated:
+                raise NotAuthenticated()
+            expense = Expense.objects.filter(user=request.user).get(id=expense_id)
             context = {
-                'record': {
-                    'id': record.id,
-                    'title': record.title,
-                    'value': record.value,
-                    'datetime': record.datetime,
-                    'is_income': record.is_income,
-                    'category__name': '' if record.category == None else record.category.name,
-                    'category__color': '#ffffff' if record.category == None else record.category.color
+                'expense': {
+                    'id': expense.id,
+                    'title': expense.title,
+                    'value': expense.value,
+                    'date': expense.date,
+                    'category__name': '' if expense.category == None else expense.category.name,
+                    'category__color': '#ffffff' if expense.category == None else expense.category.color
                 }
             }
-            return render(request, 'record_delete.html', context)
+            return render(request, 'expense_delete.html', context)
         except NotAuthenticated:
             return redirect('/accounts/login')
-        except Record.DoesNotExist:
-            messages.error(request, 'Error, invalid record')
-            return redirect('/records/')
+        except Expense.DoesNotExist:
+            messages.error(request, 'Error, invalid expense')
+            return redirect('/records/expenses')
         
-    def post(self, request, record_id=None):
+    def post(self, request, expense_id=None):
         try:
             if not request.user.is_authenticated:
                 raise NotAuthenticated()
-            record = Record.objects.filter(user=request.user).get(id=record_id)
-            record.delete()
-            messages.success(request, 'Record deleted')
-            return redirect('/records/')
+            expense = Expense.objects.filter(user=request.user).get(id=expense_id)
+            expense.delete()
+            messages.success(request, 'Expense deleted')
+            return redirect('/records/expenses')
         except NotAuthenticated:
             return redirect('/accounts/login')
-        except Record.DoesNotExist:
-            messages.error(request, 'Error, invalid record')
-            return redirect('/records/')
+        except Expense.DoesNotExist:
+            messages.error(request, 'Error, invalid expense')
+            return redirect('/records/expenses')
 
 
 class CategoryListView(View):
@@ -139,7 +243,7 @@ class CategoryView(View):
             return redirect('/accounts/login')
         except Category.DoesNotExist:
             messages.warning(request, 'Invalid category')
-            return redirect('/records/categories/')
+            return redirect('/records/categories')
     
     def post(self, request, category_id=None):
         try:
@@ -156,14 +260,16 @@ class CategoryView(View):
                 else:
                     form.save()
                     messages.success(request, 'Category saved')
-                    return redirect('/records/categories/')
+                    return redirect('/records/categories')
+            else:
+                messages.error(request, 'Invalid fields')
             context = {'form': form}
             return render(request, 'category.html', context)
         except NotAuthenticated:
             return redirect('/accounts/login')
         except Category.DoesNotExist:
             messages.warning(request, 'Invalid category')
-            return redirect('/records/categories/')
+            return redirect('/records/categories')
     
 class CategoryDeleteView(View):
     def get(self, request, category_id):
@@ -184,12 +290,12 @@ class CategoryDeleteView(View):
                 return render(request, 'category_delete.html', context)
             else:
                 messages.error(request, 'Unable to delete the category because you must have at least one')
-                return redirect('/records/categories/')
+                return redirect('/records/categories')
         except NotAuthenticated:
             return redirect('/accounts/login')
         except Category.DoesNotExist:
             messages.warning(request, 'Invalid category')
-            return redirect('/records/categories/')
+            return redirect('/records/categories')
     
     def post(self, request, category_id=None):
         try:
@@ -202,9 +308,9 @@ class CategoryDeleteView(View):
                 messages.success(request, 'Category deleted')
             else:
                 messages.error(request, 'Unable to delete the category because you must have at least one')
-            return redirect('/records/categories/')
+            return redirect('/records/categories')
         except NotAuthenticated:
             return redirect('/accounts/login')
         except Category.DoesNotExist:
             messages.warning(request, 'Invalid category')
-            return redirect('/records/categories/')
+            return redirect('/records/categories')

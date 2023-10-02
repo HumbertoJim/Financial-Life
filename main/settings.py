@@ -47,6 +47,7 @@ INSTALLED_APPS = [
 
     'accounts',
     'records',
+    'admin_panel'
 ]
 
 MIDDLEWARE = [
@@ -105,6 +106,8 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+# Authentication
+AUTHENTICATION_BACKENDS = ['accounts.backends.EmailBackend']
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
@@ -121,7 +124,22 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
+
+STATIC_ROOT = BASE_DIR / 'static/'
+
+STATICFILES_DIRS = [
+    
+]
+
+
+# User model
+AUTH_USER_MODEL = 'accounts.User'
+
+# Session time
+SESSION_EXPIRE_SECONDS = 3600
+SESSION_TIMEOUT_REDIRECT = '/accounts/login'
+SESSION_EXPIRE_AFTER_LAST_ACTIVITY = True
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field

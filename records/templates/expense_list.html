@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block title %}Expenses{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-10"><h1>Expenses</h1></div>
+        <div class="col-md-2"><a class="btn btn-success" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; " href="/records/expenses/register">Add Expense</a></div>
+    </div>
+
+    <table class="table">
+        <thead>
+            <th>Title</th>
+            <th>Category</th>
+            <th>Amount</th>
+            <th>Date</th>
+            <th></th>
+            <th></th>
+        </thead>
+        <tbody>
+            {% if expenses %}
+            {% for expense in expenses %}
+            <tr>
+                <th>{{expense.title}}</td>
+                <td><a class="btn" style="background-color: {{expense.category__color}};">{{expense.category__name}}</a></td>
+                <td>{{expense.value}}</td>
+                <td>{{expense.date}}</td>
+                <td><a class="btn btn-primary" href="/records/expenses/{{expense.id}}/edit">Edit</a></td>
+                <td><a class="btn btn-danger" href="/records/expenses/{{expense.id}}/delete">Delete</a></td>
+            </tr>
+            {% endfor %}
+            {% endif %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}

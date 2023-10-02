@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}Delete Expense{% endblock %}
+
+{% block content %}
+<div class="mx-auto col-10 col-md-4">
+    <div>
+        <h1 id="expense-title" style="text-align: center;">Delete Expense</h1>
+    </div>
+
+    <hr id="line" style="height: 1%; background-color: {{expense.category__color}};">
+
+    <form class="form-horizontal" method="post" action="/records/expenses/{{expense.id}}/delete">
+        {% csrf_token %}
+        
+        {{ form.non_field_errors }}
+
+        <div class="form-group mb-3">
+            <b>Title</b>
+            <p class="form-control">{{expense.title}}</p>
+        </div>
+
+        <div class="form-group mb-3">
+            <b>Category</b>
+            <p class="form-control" style="background-color: {{expense.category__color}};">{{expense.category__name}}</p>
+        </div>
+
+        <div class="form-group mb-3">
+            <b>Date</b>
+            <p class="form-control">{{expense.date}}</p>
+        </div>
+
+        <div class="form-group mb-3">
+            <b>Amount</b>
+            <p class="form-control">{{expense.value}}</p>
+        </div>
+        
+        <div class="form-group mb-3">
+            <b>Description</b>
+            <p class="form-control">{{expense.description}}</p>
+        </div>
+        
+        <button type="submit" class="btn btn-secondary">Delete</button>
+        <a class="btn btn-danger" href="/records/expenses">Cancel</a>
+    </form>
+
+</div>
+
+{% endblock %}

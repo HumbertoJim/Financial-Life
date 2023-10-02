@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block title %}Incomes{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-10"><h1>Incomes</h1></div>
+        <div class="col-md-2"><a class="btn btn-success" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; " href="/records/incomes/register">Add Income</a></div>
+    </div>
+
+    <table class="table">
+        <thead>
+            <th>Title</th>
+            <th>Category</th>
+            <th>Amount</th>
+            <th>Date</th>
+            <th></th>
+            <th></th>
+        </thead>
+        <tbody>
+            {% if incomes %}
+            {% for income in incomes %}
+            <tr>
+                <th>{{income.title}}</td>
+                <td><a class="btn" style="background-color: {{income.category__color}};">{{income.category__name}}</a></td>
+                <td>{{income.value}}</td>
+                <td>{{income.date}}</td>
+                <td><a class="btn btn-primary" href="/records/incomes/{{income.id}}/edit">Edit</a></td>
+                <td><a class="btn btn-danger" href="/records/incomes/{{income.id}}/delete">Delete</a></td>
+            </tr>
+            {% endfor %}
+            {% endif %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}

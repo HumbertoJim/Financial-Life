@@ -1,51 +1,60 @@
 {% extends "base.html" %}
-{% block title %}New Record{% endblock %}
+{% block title %}{%if expense_id %}Expense{%else%}New Expense{%endif%}{% endblock %}
 
 {% block content %}
 <div class="mx-auto col-10 col-md-4">
     <div>
-        <h1 id="record-title" style="text-align: center;">Delete record</h1>
+        <h1 id="expense-title" style="text-align: center;">Expense</h1>
     </div>
 
     <hr id="line" style="height: 1%;">
 
-    <form class="form-horizontal" method="post" action="/records/{{record.id}}/delete">
+    <form class="form-horizontal" method="post" {%if expense_id %} action="/records/expenses/{{expense_id}}/edit" {%else%} action="/records/expenses/register" {%endif%}>
         {% csrf_token %}
         
         {{ form.non_field_errors }}
 
         <div class="form-group mb-3">
-            <b>Title</b>
-            <p class="form-control">{{record.title}}</p>
+            <b>{{ form.title.label_tag }}</b>
+            {{ form.title.errors }}
+            {{ form.title }}
         </div>
 
         <div class="form-group mb-3">
-            <b>Type</b>
-            <p class="form-control">{% if record.is_income == 1 %}Income{% else %}Expense{% endif %}</p>
+            <b>{{ form.is_expense.label_tag }}</b>
+            {{ form.is_expense.errors }}
+            {{ form.is_expense }}
         </div>
 
         <div class="form-group mb-3">
-            <b>Category</b>
-            <p class="form-control" style="background-color: {{record.category__color}};">{{record.category__name}}</p>
+            <b>{{ form.category.label_tag }}</b>
+            {{ form.category.errors }}
+            <div class="input-group mb-3">
+                <span class="input-group-text" id="id_category_span">#</span>
+                {{ form.category }}
+            </div>
         </div>
 
         <div class="form-group mb-3">
-            <b>Date and time</b>
-            <p class="form-control">{{record.datetime}}</p>
+            <b>{{ form.date.label_tag }}</b>
+            {{ form.date.errors }}
+            {{ form.date }}
         </div>
 
         <div class="form-group mb-3">
-            <b>Amount</b>
-            <p class="form-control">{{record.value}}</p>
+            <b>{{ form.value.label_tag }}</b>
+            {{ form.value.errors }}
+            {{ form.value }}
         </div>
         
         <div class="form-group mb-3">
-            <b>Description</b>
-            <p class="form-control">{{record.description}}</p>
+            <b>{{ form.description.label_tag }}</b>
+            {{ form.description.errors }}
+            {{ form.description }}
         </div>
         
-        <button type="submit" class="btn btn-secondary">Delete</button>
-        <a class="btn btn-danger" href="/records/">Cancel</a>
+        <button type="submit" class="btn btn-success">Save</button>
+        <a class="btn btn-danger" href="/records/expenses/">Cancel</a>
     </form>
 
 </div>

@@ -1,15 +1,15 @@
 {% extends "base.html" %}
-{% block title %}New Record{% endblock %}
+{% block title %}{%if income_id %}Income{%else%}New Income{%endif%}{% endblock %}
 
 {% block content %}
 <div class="mx-auto col-10 col-md-4">
     <div>
-        <h1 id="record-title" style="text-align: center;">Record</h1>
+        <h1 id="income-title" style="text-align: center;">Income</h1>
     </div>
 
     <hr id="line" style="height: 1%;">
 
-    <form class="form-horizontal" method="post" {%if record_id %} action="/records/{{record_id}}/edit" {%else%} action="/records/register" {%endif%}>
+    <form class="form-horizontal" method="post" {%if income_id %} action="/records/incomes/{{income_id}}/edit" {%else%} action="/records/incomes/register" {%endif%}>
         {% csrf_token %}
         
         {{ form.non_field_errors }}
@@ -36,9 +36,9 @@
         </div>
 
         <div class="form-group mb-3">
-            <b>{{ form.datetime.label_tag }}</b>
-            {{ form.datetime.errors }}
-            {{ form.datetime }}
+            <b>{{ form.date.label_tag }}</b>
+            {{ form.date.errors }}
+            {{ form.date }}
         </div>
 
         <div class="form-group mb-3">
@@ -54,7 +54,7 @@
         </div>
         
         <button type="submit" class="btn btn-success">Save</button>
-        <a class="btn btn-danger" href="/records/">Cancel</a>
+        <a class="btn btn-danger" href="/records/incomes/">Cancel</a>
     </form>
 
 </div>

@@ -5,60 +5,57 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 {% block content %}
-<h1 class="text-center">Home</h1>
-<hr>
-<br>
 <h4 class="text-center">Page in developing process...</h4>
-
+<br>
 
 {% if user.is_authenticated %}
 
-<div class="row">
-    <div class="col-4"></div><canvas id="expensesPerCategory"></canvas>
-    <div class="col-4"></div><canvas id="char2"></canvas>
-    <div class="col-4"></div><canvas id="chart3"></canvas>
+<div class="mx-auto">
+    <div class="col-12"><canvas id="records" style="width: 50%; height: 50%;"></canvas></div>
+    <div class="row">
+        <div class="col-6"><canvas id="expenses-by-category" style="width: 50%;"></canvas></div>
+        <div class="col-6"><canvas id="incomes-by-category" style="width: 50%;"></canvas></div>
+    </div>
 </div>
-
-
-
-
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    const ctx = document.getElementById('expensesPerCategory').getContext('2d');
+    const ctx = document.getElementById('records').getContext('2d');
     const chart = new Chart(ctx, {
-        type: 'bar',
+        type: 'line',
         data: {
             labels : [{% for item in labels %}"{{ item }}",{% endfor %}],
             datasets: [{
-                label: "Expenses per Category",
+                label: "Incomes and Expenses",
                 data : [{% for item in values %}{{ item }},{% endfor %}],
             }]
         },
     });
 </script>
+
 <script>
-    const ctx2 = document.getElementById('chart2').getContext('2d');
-    const chart2 = new Chart(ctx2, {
+    const ctx_expenses = document.getElementById('expenses-by-category').getContext('2d');
+    const chart_expenses = new Chart(ctx_expenses, {
         type: 'bar',
         data: {
-            labels : [{% for item in labels %}"{{ item }}",{% endfor %}],
+            labels : [{% for item3 in labels_expenses %}"{{ item3 }}",{% endfor %}],
             datasets: [{
-                label: "Expenses per Category 2",
-                data : [{% for item in values %}{{ item }},{% endfor %}],
+                label: "Expenses by Category",
+                data : [{% for item3 in values_expenses %}{{ item3 }},{% endfor %}],
             }]
         },
     });
 </script>
+
 <script>
-    const ctx3 = document.getElementById('chart3').getContext('2d');
-    const chart3 = new Chart(ctx3, {
+    const ctx_incomes = document.getElementById('incomes-by-category').getContext('2d');
+    const chart_incomes = new Chart(ctx_incomes, {
         type: 'bar',
         data: {
-            labels : [{% for item in labels %}"{{ item }}",{% endfor %}],
+            labels : [{% for item2 in labels_incomes %}"{{ item2 }}",{% endfor %}],
             datasets: [{
-                label: "Expenses per Category 3",
-                data : [{% for item in values %}{{ item }},{% endfor %}],
+                label: "Incomes by Category",
+                data : [{% for item2 in values_incomes %}{{ item2 }},{% endfor %}],
             }]
         },
     });
